@@ -6,6 +6,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { openDb } from './db.js';
 import { createApp } from './app.js';
+import { createToken } from './token.js';
+import { backupDaily } from './backup.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const env = process.env;
@@ -29,9 +31,22 @@ const app = createApp({
   eventSetting: env.EVENT?.trim() || 'auto',
   // The $FANG shop: off until the token is live; SHOP=test gives test balances locally.
   shopMode: env.SHOP?.trim() === 'test' ? 'test' : 'off',
+  // $FANG: launch wallet, prize pool wallet and share, X link (FANG_* settings, see README).
+  fang: createToken({ env }),
 });
-app.game.prune();
-setInterval(() => app.game.prune(), 6 * 36e5).unref();
+// Housekeeping every 6 hours: drop stale guests, keep a daily copy of the database.
+const backupDir = path.join(dataDir, 'backups');
+function housekeeping() {
+  app.game.prune();
+  try {
+    const file = backupDaily(db, backupDir);
+    if (file) console.log(`Backup written: ${file}`);
+  } catch (e) {
+    console.error(`Backup failed: ${e.message}`);
+  }
+}
+housekeeping();
+setInterval(housekeeping, 6 * 36e5).unref();
 
 const port = Number(env.PORT) || 4380;
 const server = createServer(app.handle).listen(port, () => console.log(`Fangbound on http://localhost:${port}`));

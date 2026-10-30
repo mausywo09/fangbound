@@ -150,6 +150,23 @@ packages: three.js is vendored in `vendor/three` and the media in `media/` is pr
 | `POST /api/tutorial/skip` | Skip the tutorial (the reward stays for a later training battle) |
 | `POST /api/shop/buy` | Buy a shop item (`{ item }`) with $FANG (closed until launch; test balance with `SHOP=test`) |
 | `GET /api/leaderboard` | This season's top 10, your rank, last season's final standings |
+| `GET /api/token` | $FANG: `status` (`not-configured`, `not-launched`, `unavailable`, `live`); once live the contract address, pool, on-chain facts and curve; the prize pool (`share`, `wallet`, `sol`) and the X link |
+
+## $FANG launch
+
+The landing page finds the launch by itself (`server/launch.js`): the server reads the launch
+wallet's history every 8 s and takes the first Meteora DBC pool it created, signed by that
+wallet, after `FANG_SINCE`, with the symbol `FANG`. The page then shows the contract address,
+Copy, Buy (Jupiter), Chart (DexScreener), the bonding curve and eight on-chain facts within
+about 10 s, without a deploy. **Never test-launch from the launch wallet:** the first FANG
+launch it makes becomes the official contract address. `FANG_MINT` pins one by hand if needed.
+
+The season prize pool is a public wallet (`FANG_POOL_WALLET`): its SOL balance is the pool
+shown on the page, with a Solscan link, so anyone can check it. Pay the frozen top 3 from it
+at the end of each season and post the transactions.
+
+`node tools/dev-live.mjs` (port 4382) previews the live page with the real $CTAP launch.
+`node brand/render.mjs` writes the token logo, X avatar and X banners to `brand/out/`.
 
 ## Settings (environment)
 
@@ -163,8 +180,20 @@ packages: three.js is vendored in `vendor/three` and the media in `media/` is pr
 | `COOKIE_SECURE` | auto | `1`/`0` to force the Secure cookie flag. |
 | `SHOP` | `off` | The $FANG shop: `off` until the token is live, `test` for local test balances (never real). |
 | `EVENT` | `auto` | Seasonal event: `auto` runs each one between its dates, `off` turns events off, `halloween` forces Night of Fangs. |
+| `FANG_CREATOR` | in `server/launch.js` | The launch wallet $FANG is launched from (public address). Empty: the page says "launching soon". |
+| `FANG_SINCE` | `2026-10-30T00:00:00Z` | Only launches after this count. |
+| `FANG_SYMBOL` | `FANG` | The launch must carry this symbol; empty turns the check off. |
+| `FANG_MINT` | none | Pins the contract address by hand (wins over detection). |
+| `FANG_POOL_WALLET` | in `server/token.js` | The public prize pool wallet; its balance is the pool shown. |
+| `FANG_POOL_SHARE` | in `server/token.js` | Percent of creator fees that fills each season's pool, e.g. `30`. |
+| `FANG_POOL_TOPUP` | `1` | `1`: the page says the creator also tops the pool up; `0` turns that line off. |
+| `FANG_X` | in `server/token.js` | The X account (`@name` or a link); shows the X links on the landing page. |
+| `SOLANA_RPC` | Helius, then publicnode | Comma-separated mainnet RPC URLs, tried in order. |
 
 The `Dockerfile` runs the server with `TRUST_PROXY=1`; mount persistent storage at `/app/data`.
+Every 6 hours the server makes sure there is a copy of the database for today in
+`DATA_DIR/backups` (the newest 7 days are kept). Those copies sit on the same volume, so copy
+one off the server now and then.
 
 ## Layout
 
@@ -175,6 +204,8 @@ The `Dockerfile` runs the server with `TRUST_PROXY=1`; mount persistent storage 
 | `server/game.js` | matchmaking, matches, defenses, eggs, leaderboard, season close |
 | `server/auth.js`, `server/base58.js` | wallet signature checks, session cookies |
 | `server/db.js` | SQLite schema |
+| `server/launch.js`, `server/token.js` | $FANG launch detection and on-chain facts; the prize pool and links |
+| `server/backup.js` | daily database copies |
 | `src/data.js`, `src/sim.js` | monsters and the battle engine (shared with the server) |
 | `src/state.js`, `src/match.js` | progression rules and bots (shared with the server) |
 | `src/pass.js` | daily quests, check-in streak, season pass and titles (shared) |
@@ -194,6 +225,8 @@ The `Dockerfile` runs the server with `TRUST_PROXY=1`; mount persistent storage 
 | `tools/render-media.mjs`, `tools/shot.mjs` | media renders; quick screenshots |
 | `src/api.js`, `src/wallet.js` | server calls, wallet connect |
 | `tools/balance.mjs` | balance report |
+| `tools/dev-live.mjs` | local preview with $FANG live (real $CTAP data) |
+| `brand/render.mjs` | token logo, X avatar and banners (`brand/out/`) |
 
 ## Next steps
 

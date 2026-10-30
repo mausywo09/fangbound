@@ -102,6 +102,9 @@ const ICONS = {
   seal: '<rect x="5" y="10" width="14" height="10" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2.5"/>',
   swords: '<path d="M4 4l9 9M20 4l-9 9M14.5 17.5l5-5M4.5 12.5l5 5M17 20l3-3M4 17l3 3"/>',
   key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l2.5 2.5M14 9l2 2"/>',
+  crown: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/>',
+  bag: '<path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  ribbon: '<circle cx="12" cy="9" r="5"/><path d="M9 13.5L7 21l5-2.5 5 2.5-2-7.5"/>',
 };
 document.querySelectorAll('[data-icon]').forEach((el) => { el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[el.dataset.icon]}</svg>`; });
 
@@ -128,6 +131,142 @@ async function season() {
   }
 }
 season();
+
+// ---- $FANG: contract address, curve, on-chain facts and the prize pool ----
+// The server finds the launch by itself (server/launch.js), so the page flips to live
+// within seconds of it, without a deploy.
+let ca = '';
+let wasLive = null;
+const num = (n) => Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+const short = (a) => `${a.slice(0, 4)}…${a.slice(-4)}`;
+
+// data-ca="short": the head shrinks with an ellipsis and the last 6 characters stay;
+// data-ca="full": the whole address, wrapping.
+function renderCa(el) {
+  el.classList.toggle('pending', !ca);
+  el.title = ca;
+  el.replaceChildren();
+  if (!ca) return void (el.textContent = el.dataset.ca === 'full' ? 'Drops at launch' : 'Launching soon');
+  if (el.dataset.ca === 'full') return void (el.textContent = ca);
+  const head = document.createElement('span');
+  const tail = document.createElement('span');
+  head.className = 'ca-head';
+  head.textContent = ca.slice(0, -6);
+  tail.textContent = ca.slice(-6);
+  el.append(head, tail);
+}
+
+function renderToken(t) {
+  const live = t.status === 'live' && !!t.mint;
+  ca = live ? t.mint : '';
+  document.querySelectorAll('[data-ca]').forEach(renderCa);
+  document.querySelectorAll('[data-copy-ca]').forEach((b) => { b.hidden = !ca; });
+  document.querySelectorAll('[data-ca-note]').forEach((el) => { el.hidden = !!ca; });
+  const links = { x: t.links?.x, buy: ca && `https://jup.ag/swap/SOL-${ca}`, chart: ca && `https://dexscreener.com/solana/${ca}` };
+  document.querySelectorAll('[data-link]').forEach((a) => {
+    const href = links[a.dataset.link];
+    if (a.dataset.link === 'x') a.hidden = !href;
+    if (href) {
+      a.href = href;
+      a.removeAttribute('aria-disabled');
+    } else {
+      a.removeAttribute('href');
+      a.setAttribute('aria-disabled', 'true');
+    }
+  });
+
+  const c = live && t.curve;
+  $('curve').hidden = !c;
+  if (c) {
+    const p = c.graduated ? 100 : Math.max(0, Math.min(100, Number(c.progress) || 0));
+    const target = (t.facts?.migratesTo || 'a Meteora DAMM pool').replace(/ \(.*\)$/, '');
+    $('curvePct').textContent = c.graduated ? 'Graduated' : `${p < 10 ? p.toFixed(1) : Math.round(p)}%`;
+    $('curveFill').style.width = `${p}%`;
+    $('curveBar').setAttribute('aria-valuenow', String(Math.round(p)));
+    $('curveSub').textContent = c.graduated
+      ? `The curve is full. $FANG now trades on ${target}.`
+      : `${num(c.raised)} / ${num(c.threshold)} ${c.quoteSymbol} in the curve. At 100% it graduates to ${target}.`;
+  }
+  const F = live && t.facts;
+  if (F) {
+    $('facts').innerHTML = [
+      ['Supply', num(F.supply)], ['Bonding curve', `${F.curvePercent}% of supply`],
+      ['Graduates at', `${num(F.migrationThreshold)} ${F.quoteSymbol}`], ['Migrates to', F.migratesTo],
+      ['Trading fee', F.tradingFee], ['Graduation LP', F.lpLock],
+      ['Mint authority', F.mintAuthority], ['Freeze authority', F.freezeAuthority],
+    ].map(([k, v]) => `<div class="fact"><small>${k}</small><b>${esc(String(v))}</b></div>`).join('');
+  }
+
+  // The pool is a public wallet: its balance is the pool, and anyone can check it on Solscan.
+  const prize = t.prize ?? {};
+  // topUp: the creator also adds to the pool from their own funds.
+  const plus = prize.topUp ? ', plus top-ups from the creator,' : '';
+  if (prize.share) {
+    $('poolShare').textContent = `${prize.share}% of $FANG's creator trading fees${plus} flow`;
+    $('poolUse').textContent = `${prize.share}% of creator fees${plus} fill each 14-day season's pool. The top three wallets are paid on-chain.`;
+  }
+  $('poolWhen').textContent = live ? 'Live' : 'At launch';
+  $('poolWhen').classList.toggle('live', live);
+  $('poolAmount').textContent = prize.sol != null ? `${num(prize.sol)} SOL` : '— SOL';
+  $('poolNote').textContent = prize.sol != null ? 'in the pool wallet now' : live ? `filled from creator fees${prize.topUp ? ' and top-ups' : ''}` : '$FANG not live yet';
+  $('poolWallet').hidden = !prize.wallet;
+  if (prize.wallet) {
+    $('poolWallet').href = `https://solscan.io/account/${prize.wallet}`;
+    $('poolWallet').textContent = `Pool wallet ${short(prize.wallet)} ↗`;
+  }
+  if (wasLive === false && live) toast('$FANG is live! The contract address is on this page.');
+  wasLive = live;
+}
+
+// Polls fast while waiting for the launch, slower once live or while nothing is set up.
+async function token() {
+  let wait = 30_000;
+  try {
+    const res = await fetch('/api/token', { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const t = await res.json();
+    renderToken(t);
+    wait = t.status === 'live' ? 30_000 : t.status === 'not-configured' ? 60_000 : 10_000;
+  } catch {
+    // keep what the page shows and try again
+  }
+  setTimeout(token, wait);
+}
+token();
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // blocked or unavailable: fall back to a hidden textarea
+  }
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta);
+  ta.select();
+  let ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch {
+    ok = false;
+  }
+  ta.remove();
+  return ok;
+}
+document.querySelectorAll('[data-copy-ca]').forEach((b) => b.addEventListener('click', async () => {
+  toast((await copyText(ca)) ? 'Contract address copied' : 'Copy failed: select the address by hand');
+}));
 
 // ---- reveal on scroll ----
 const io = new IntersectionObserver((entries) => {

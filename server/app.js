@@ -23,6 +23,7 @@ const PUBLIC = [
   /^\/media\/[\w/-]+\.(mp4|webm|jpg|png|webp)$/,
 ];
 const SECURITY = { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'X-Frame-Options': 'DENY' };
+const NO_FANG = { get: async () => ({ status: 'not-configured', prize: { share: null, topUp: false, wallet: null, sol: null }, links: { x: null } }) };
 
 /**
  * root: folder with index.html and src/. publicHost: the host sign-in messages must name
@@ -30,8 +31,9 @@ const SECURITY = { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same
  * X-Forwarded-* (behind Coolify's proxy). secureCookies: null = Secure when the proxy says https.
  * eventSetting: the seasonal event ('auto' by date, 'off', or an event id such as 'halloween').
  * shopMode: the $FANG shop, 'off' (closed until the token is live) or 'test' (test balances).
+ * fang: what GET /api/token answers (server/token.js); none means $FANG is not set up.
  */
-export function createApp({ db, root, now = Date.now, seasonStart, publicHost = '', trustProxy = false, secureCookies = null, eventSetting = 'auto', shopMode = 'off' }) {
+export function createApp({ db, root, now = Date.now, seasonStart, publicHost = '', trustProxy = false, secureCookies = null, eventSetting = 'auto', shopMode = 'off', fang = NO_FANG }) {
   const game = createGame(db, { now, seasonStart, eventSetting, shopMode });
   const limits = rateLimiter(now);
 
@@ -174,6 +176,8 @@ export function createApp({ db, root, now = Date.now, seasonStart, publicHost = 
       return { ...game.buy(p, ctx.body?.item), me: game.me(p) };
     },
     'GET /api/leaderboard': (ctx) => game.leaderboard(ctx.player),
+    // $FANG for the landing page: the contract address once launched, the curve, the prize pool.
+    'GET /api/token': () => fang.get(),
     'GET /api/health': () => ({ ok: true }),
   };
 
@@ -200,7 +204,7 @@ export function createApp({ db, root, now = Date.now, seasonStart, publicHost = 
     const player = id ? game.load(id) : null;
     const ctx = { req, token: player ? token : null, player, cookies: [] };
     ctx.body = req.method === 'POST' ? await readJson(req) : null;
-    json(res, 200, route(ctx, param), ctx.cookies);
+    json(res, 200, await route(ctx, param), ctx.cookies);
   }
 
   async function serveStatic(req, res, pathname) {

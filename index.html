@@ -24,8 +24,10 @@
       <a href="#monsters">Monsters</a>
       <a href="#how">How to play</a>
       <a href="#season">Season</a>
+      <a href="#token">$FANG</a>
       <a href="#fair">Fair play</a>
     </div>
+    <a class="xlink" data-link="x" target="_blank" rel="noopener" aria-label="Fangbound on X" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 3h3.1l-6.8 7.7 8 10.3h-6.2l-4.9-6.3L5.4 21H2.3l7.2-8.3L1.8 3h6.4l4.4 5.8L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg></a>
     <a class="btn gold" href="/play">Play now</a>
   </nav>
 
@@ -39,6 +41,12 @@
       <div class="cta">
         <a class="btn gold big" href="/play">Enter the arena</a>
         <a class="btn glass big" href="#how">How it works</a>
+      </div>
+      <div class="tokenbar" id="tokenBar">
+        <b>$FANG</b>
+        <span class="tb-ca" data-ca="short">Launching soon</span>
+        <button class="tb-copy" type="button" data-copy-ca hidden>Copy</button>
+        <a class="tb-link" href="#token" id="tokenBarLink">Details</a>
       </div>
       <div class="stats">
         <div><b id="statMons">15</b><span>monsters</span></div>
@@ -94,20 +102,59 @@
       <div class="prize reveal">
         <span class="kicker">Season prize pool</span>
         <h2>The top three take the pool</h2>
-        <p>A share of $FANG's trading fees flows into each season's pool. When the 14 days are up, the final standings freeze and the top three are paid on-chain, in public.</p>
+        <p><span id="poolShare">A share of $FANG's trading fees flows</span> into each season's pool. When the 14 days are up, the final standings freeze and the top three are paid on-chain, in public.</p>
         <div class="pool-card">
           <div class="pool-top"><span>Season <b id="poolSeason">1</b></span><span class="pill soft" id="poolEnds">—</span></div>
-          <div class="pool-amount"><b>— SOL</b><small>$FANG not live yet</small></div>
+          <div class="pool-amount"><b id="poolAmount">— SOL</b><small id="poolNote">$FANG not live yet</small></div>
           <div class="podium">
             <div class="p2"><i class="medal m2">II</i><b>30%</b></div>
             <div class="p1"><i class="medal m1">I</i><b>50%</b></div>
             <div class="p3"><i class="medal m3">III</i><b>20%</b></div>
           </div>
+          <a class="pool-wallet" id="poolWallet" target="_blank" rel="noopener" hidden></a>
         </div>
       </div>
       <div class="board reveal">
         <div class="board-h"><h3>Live leaderboard</h3><a href="/play" class="link">Join the ladder →</a></div>
         <ol id="board"><li class="empty">Loading the ladder…</li></ol>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true"><span></span></div>
+    <section class="section" id="token">
+      <div class="head reveal">
+        <span class="kicker">$FANG</span>
+        <h2>The arena's token</h2>
+        <p>$FANG launches on a Meteora bonding curve on Solana. Its creator fees pay each season's top three, and paying never buys power: the shop only saves time.</p>
+      </div>
+      <div class="token reveal">
+        <div class="ca-card">
+          <small class="ca-label">Contract address</small>
+          <code class="ca" data-ca="full">Drops at launch</code>
+          <p class="ca-note" data-ca-note>The address appears here the moment $FANG launches. Only trust the one shown on fangbound.com and on our X.</p>
+          <div class="ca-actions">
+            <button class="btn gold" type="button" data-copy-ca hidden>Copy CA</button>
+            <a class="btn glass" data-link="buy" target="_blank" rel="noopener">Buy</a>
+            <a class="btn glass" data-link="chart" target="_blank" rel="noopener">Chart</a>
+          </div>
+          <div class="curve" id="curve" hidden>
+            <div class="curve-top"><span>Bonding curve</span><strong id="curvePct">0%</strong></div>
+            <div class="curve-bar" id="curveBar" role="progressbar" aria-label="Bonding curve progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="curveFill"></i></div>
+            <p id="curveSub"></p>
+          </div>
+        </div>
+        <div class="facts" id="facts"><p class="facts-wait">Supply, curve, graduation, fees and authorities are read from the chain and shown here at launch.</p></div>
+      </div>
+      <div class="uses">
+        <div class="fcard reveal"><i data-icon="crown"></i><span class="when" id="poolWhen">At launch</span><h3>Season prize pool</h3><p id="poolUse">A share of creator fees fills each 14-day season's pool. The top three wallets are paid on-chain.</p></div>
+        <div class="fcard reveal"><i data-icon="bag"></i><span class="when">Opens later</span><h3>The shop</h3><p>Eggs, tomes and boosters that save time. Nothing in it makes a monster stronger, and half of all $FANG spent there is burned.</p></div>
+        <div class="fcard reveal"><i data-icon="ribbon"></i><span class="when">Opens later</span><h3>Premium pass</h3><p>A second reward track each season, unlocked with $FANG. The free track stays free.</p></div>
+      </div>
+      <div class="disclaimer reveal" id="disclaimer">
+        <h3>Disclaimer</h3>
+        <p>$FANG is a community token for the Fangbound game. It is not an investment, and nothing on this site is financial advice. Crypto prices swing hard and you can lose everything you put in, so only use what you can afford to lose.</p>
+        <p>The season prize pool comes from a share of creator trading fees and top-ups from the creator, so its size changes from season to season and no amount is guaranteed. When a season ends, the top three ranked players with a connected wallet are paid on-chain. Accounts that break fair play, such as one player running several accounts, can be left out. The shop and premium pass are not open yet and may change before they do.</p>
+        <p>Check the rules where you live before you buy tokens or play for prizes.</p>
       </div>
     </section>
 
@@ -135,9 +182,10 @@
 
   <footer class="foot">
     <a class="logo" href="/"><span class="logo-mark" id="logo2"></span><span>FANGBOUND</span></a>
-    <span>© 2026 Fangbound · Alpha</span>
-    <div><a href="/play">Play</a><a href="#monsters">Monsters</a><a href="#season">Season</a></div>
+    <span>© 2026 Fangbound · Alpha · <a href="#disclaimer">Not financial advice</a></span>
+    <div><a href="/play">Play</a><a href="#monsters">Monsters</a><a href="#season">Season</a><a href="#token">$FANG</a><a data-link="x" target="_blank" rel="noopener" hidden>X</a></div>
   </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script type="module" src="/src/landing.js"></script>
 </body>
