@@ -9,8 +9,8 @@
 // hand a pool to any wallet without its signature. FANG_MINT pins a mint by hand and wins.
 
 export const DBC_PROGRAM = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN';
-// The launch wallet (fresh, no transactions on 2026-10-30); FANG_CREATOR overrides.
-export const DEFAULT_CREATOR = '9m9kk38sboC6mFpjutmeMwBr62HB725or5J7gJTG5PSL';
+// The launch wallet (fresh, no transactions on 2026-10-31); FANG_CREATOR overrides.
+export const DEFAULT_CREATOR = '2kKMS2wd2ag2v7Xu4yD3BcnfbsdqSNugn2GmAUGuWsq3';
 export const DEFAULT_SINCE = '2026-10-30T00:00:00Z';
 export const DEFAULT_SYMBOL = 'FANG';
 // How often, at most, the chain is asked for the launch before it is found.
