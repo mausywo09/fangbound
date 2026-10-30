@@ -62,7 +62,10 @@ input { font: inherit; color: inherit; }
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 1px 0 rgba(214, 168, 92, 0.28), 0 10px 30px rgba(0, 0, 0, 0.45);
 }
-.brand { justify-self: start; display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 800; font-size: 21px; letter-spacing: 0.12em; }
+.brand { justify-self: start; display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 800; font-size: 21px; letter-spacing: 0.12em; color: inherit; text-decoration: none; }
+/* A small back chevron says the logo leaves the game for the home page. */
+.brand .back { width: 8px; height: 8px; margin-right: -2px; border: solid var(--gold); border-width: 0 0 2px 2px; transform: rotate(45deg); opacity: 0.55; transition: transform 0.15s, opacity 0.15s; }
+.brand:hover .back, .brand:focus-visible .back { opacity: 1; transform: translateX(-3px) rotate(45deg); }
 .brand svg { width: 36px; height: 36px; filter: drop-shadow(0 0 10px rgba(255, 110, 40, 0.35)); }
 .brand span { background: linear-gradient(180deg, #fff6dc 20%, #e8bf6a 60%, #a8742e); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .brand em { font: 700 10px var(--ui); font-style: normal; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--line); padding: 2px 7px; border-radius: 3px; }
@@ -112,8 +115,11 @@ input { font: inherit; color: inherit; }
 }
 /* Phones: brand, rating and wallet share one row; the lobby shows tier and record. */
 @media (max-width: 480px) {
-  .brand { font-size: 17px; letter-spacing: 0.08em; }
-  .brand svg { width: 30px; height: 30px; }
+  .brand { font-size: 16px; letter-spacing: 0.05em; gap: 6px; }
+  .brand svg { width: 28px; height: 28px; }
+  .hright { gap: 8px; }
+  /* A wallet address needs the rating's room (the lobby still shows the rating). */
+  .hright:has(.acct.on) .me { display: none; }
   .me .tier, .me small { display: none; }
   .tab { font-size: 12px; letter-spacing: 0.08em; }
   .tab .gl { display: none; }
@@ -124,6 +130,8 @@ input { font: inherit; color: inherit; }
   html[data-event] .tabs { justify-content: space-between; overflow-x: auto; scrollbar-width: none; }
   html[data-event] .tab { flex: none; font-size: 11px; letter-spacing: 0.05em; padding: 0 3px; }
 }
+@media (max-width: 374px) { .hright .me { display: none; } }
+@media (max-width: 340px) { .brand span { font-size: 14px; } .acct.on i { display: none; } }
 
 /* panels: dark stone with a thin gold edge and gold corners */
 .card, .sheet {

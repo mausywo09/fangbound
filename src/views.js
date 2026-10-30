@@ -74,7 +74,8 @@ export function header(me, tab, replay) {
   const acct = !me ? '' : me.wallet
     ? `<button class="acct on" data-act="account" title="${esc(me.wallet)}"><i></i>${short(me.wallet)}</button>`
     : '<button class="acct" data-act="connect"><span class="long">Connect wallet</span><span class="short">Connect</span></button>';
-  return `<div class="brand" data-act="tab" data-arg="battle">${logoArt()}<span>FANGBOUND</span><em>alpha</em></div>
+  // The logo leads back to the landing page (the Battle tab is the game's own home).
+  return `<a class="brand" href="/" title="Back to the Fangbound home page"><i class="back" aria-hidden="true"></i>${logoArt()}<span>FANGBOUND</span><em>alpha</em></a>
 <nav class="tabs">${tabs.map(([k, n, g]) => `<button class="tab ${k === 'event' ? 'ev' : ''} ${!replay && tab === k ? 'on' : ''}" data-act="tab" data-arg="${k}">${glyph(g)}<span>${n}</span>${dot(k)}</button>`).join('')}</nav>
 <div class="hright"><button class="shopbtn ${tab === 'shop' && !replay ? 'on' : ''}" data-act="tab" data-arg="shop" title="The $FANG shop">${glyph('all')}<span>${me?.shop?.mode === 'test' ? Number(me.shop.balance).toLocaleString('en-US') : 'Shop'}</span></button>${me?.event && s?.event ? candyTag(s.event.candy) : ''}${s ? `<div class="me">${tierBadge(s.rating)}<div><b>${s.rating}</b><small>${s.wins}W · ${s.losses}L</small></div></div>` : ''}${acct}</div>`;
 }
