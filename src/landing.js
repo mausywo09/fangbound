@@ -162,7 +162,8 @@ function renderToken(t) {
   document.querySelectorAll('[data-ca]').forEach(renderCa);
   document.querySelectorAll('[data-copy-ca]').forEach((b) => { b.hidden = !ca; });
   document.querySelectorAll('[data-ca-note]').forEach((el) => { el.hidden = !!ca; });
-  const links = { x: t.links?.x, buy: ca && `https://jup.ag/swap/SOL-${ca}`, chart: ca && `https://dexscreener.com/solana/${ca}` };
+  // Jupiter's old /swap/SOL-<mint> form now redirects to SOL→USDC; the query form keeps the token.
+  const links = { x: t.links?.x, buy: ca && `https://jup.ag/swap?sell=So11111111111111111111111111111111111111112&buy=${ca}`, chart: ca && `https://dexscreener.com/solana/${ca}` };
   document.querySelectorAll('[data-link]').forEach((a) => {
     const href = links[a.dataset.link];
     if (a.dataset.link === 'x') a.hidden = !href;
