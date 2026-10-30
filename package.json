@@ -1,0 +1,22 @@
+{
+  "name": "fangbound",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Monster auto-battler: pick 3, auto battle, ranked seasons. The server decides every ranked match.",
+  "scripts": {
+    "dev": "node --watch server/index.js",
+    "start": "node server/index.js",
+    "test": "node --test",
+    "balance": "node tools/balance.mjs",
+    "vendor": "node tools/vendor-three.mjs",
+    "media": "node tools/render-media.mjs all"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.14.0",
+    "three": "^0.170.0"
+  }
+}
