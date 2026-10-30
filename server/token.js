@@ -3,9 +3,9 @@
 // SOL balance is the pool, so anyone can check it; the X link sits beside them.
 import { createLaunchResolver, isAddress, jsonRpc } from './launch.js';
 
-// FANG_X, FANG_POOL_WALLET, FANG_POOL_SHARE and FANG_POOL_TOPUP override these. The X account
-// and the pool wallet are not set up yet (2026-10-30).
-export const DEFAULT_X = '';
+// FANG_X, FANG_POOL_WALLET, FANG_POOL_SHARE and FANG_POOL_TOPUP override these. The pool
+// wallet is not set up yet (2026-10-30).
+export const DEFAULT_X = '@fangboundgame';
 export const DEFAULT_POOL_WALLET = '';
 // Percent of $FANG creator fees that funds each season's pool (empty = not announced yet).
 export const DEFAULT_POOL_SHARE = '10';
